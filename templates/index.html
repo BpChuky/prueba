@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Solicitar Turno - Asesoría Judicial</title>
+</head>
+<body>
+    <h1>Solicitá tu turno</h1>
+
+    <form action="/turno" method="POST" enctype="multipart/form-data">
+        <label for="nombre">Nombre completo:</label><br />
+        <input type="text" id="nombre" name="nombre" required /><br /><br />
+
+        <label for="email">Correo electrónico:</label><br />
+        <input type="email" id="email" name="email" required /><br /><br />
+
+        <label for="telefono">Teléfono:</label><br />
+        <input type="tel" id="telefono" name="telefono" required /><br /><br />
+
+        <label for="fecha">Fecha del turno:</label><br />
+        <input type="date" id="fecha" name="fecha" required /><br /><br />
+
+        <label for="hora">Hora del turno:</label><br />
+        <select name="hora" id="hora" required>
+            <option value="">Seleccionar hora</option>
+            <option value="09:00">09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+            <option value="14:00">14:00</option>
+            <option value="15:00">15:00</option>
+        </select><br /><br />
+
+        <label for="motivo">Motivo de la consulta:</label><br />
+        <textarea id="motivo" name="motivo" rows="4" cols="40" required></textarea><br /><br />
+
+        <label for="comprobante">Imagen del comprobante de pago:</label><br />
+        <input type="file" id="comprobante" name="comprobante" accept="image/*" /><br /><br />
+
+        <button type="submit">Solicitar turno</button>
+    </form>
+
+    <script>
+        const turnos_ocupados = {{ turnos_ocupados | tojson }};
+        const inputFecha = document.getElementById("fecha");
+        const selectHora = document.getElementById("hora");
+        const form = document.querySelector("form");
+    
+        function formatearFechaHoy() {
+            const hoy = new Date();
+            const yyyy = hoy.getFullYear();
+            let mm = hoy.getMonth() + 1;
+            let dd = hoy.getDate();
+            if (mm < 10) mm = '0' + mm;
+            if (dd < 10) dd = '0' + dd;
+            return `${yyyy}-${mm}-${dd}`;
+        }
+    
+        // Establecer fecha mínima (hoy)
+        inputFecha.min = formatearFechaHoy();
+    
+        // Función para actualizar las horas disponibles al cambiar fecha
+        inputFecha.addEventListener("change", function () {
+            const fechaSeleccionada = this.value;
+    
+            // Habilitar todas las opciones primero
+            Array.from(selectHora.options).forEach(option => option.disabled = false);
+    
+            if (!fechaSeleccionada) return;
+    
+            // Filtrar horas ocupadas para esa fecha
+            const horasOcupadas = turnos_ocupados
+                .filter(t => t.fecha === fechaSeleccionada)
+                .map(t => t.hora);
+    
+            // Deshabilitar horas ocupadas
+            Array.from(selectHora.options).forEach(option => {
+                if (horasOcupadas.includes(option.value)) {
+                    option.disabled = true;
+                }
+            });
+    
+            // Si la hora seleccionada está ocupada, la limpia
+            if (horasOcupadas.includes(selectHora.value)) {
+                selectHora.value = "";
+            }
+        });
+    
+        // Validar fecha en el submit
+        form.addEventListener("submit", function(event) {
+            const fechaSeleccionada = inputFecha.value;
+            const fechaMinima = inputFecha.min;
+    
+            if (fechaSeleccionada < fechaMinima) {
+                event.preventDefault();
+                alert("La fecha no puede ser anterior al día de hoy.");
+            }
+        });
+    </script>
+</body>
+</html>

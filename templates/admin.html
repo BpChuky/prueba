@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Turnos Recibidos</title>
+</head>
+<body>
+    <h1>Turnos guardados</h1>
+    {% if turnos %}
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Motivo</th>
+                <th>Comprobante</th>
+            </tr>
+            {% for turno in turnos %}
+            <tr>
+                <td>{{ turno.id }}</td>
+                <td>{{ turno.nombre }}</td>
+                <td>{{ turno.email }}</td>
+                <td>{{ turno.telefono }}</td>
+                <td>{{ turno.fecha }}</td>
+                <td>{{ turno.hora }}</td>
+                <td>{{ turno.motivo }}</td>
+                <td>
+                    {% if turno.comprobante %}
+                        <a href="{{ url_for('static', filename=turno.comprobante.split('static/')[-1]) }}" target="_blank">Ver</a>
+                    {% else %}
+                        Sin archivo
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No hay turnos registrados.</p>
+    {% endif %}
+    <br>
+    <a href="/">Volver al formulario</a>
+
+    <a href="/logout">Cerrar sesión</a>
+</body>
+</html>
